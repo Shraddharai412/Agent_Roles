@@ -1,99 +1,224 @@
-// src/pages/AddPolicy.jsx
-import { useState } from 'react';
+import { useState } from "react";
 import styles from '../styles/AddPolicy.module.css';
 
-const AddPolicy = () => {
-  const [policyName, setPolicyName] = useState('');
-  const [policyType, setPolicyType] = useState('');
-  const [coverageAmount, setCoverageAmount] = useState('');
-  const [duration, setDuration] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+function AddPolicy() {
+    const [formData, setFormData] = useState({
+        name: '',
+        dob: '',
+        gender: '',
+        email: '',
+        phoneNumber: '',
+        occupation: '',
+        employerName: '',
+        workAddress: '',
+        insuranceType: 'Life insurance',
+        coverageAmount: '',
+        premiumPayment: '',
+        additionalRiders: '',
+        declaration: false
+    });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setFormData(prevFormData => ({
+            ...prevFormData,
+            [name]: type === 'checkbox' ? checked : value
+        }));
+    };
 
-    // Reset messages
-    setErrorMessage('');
-    setSuccessMessage('');
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        
+        if (!formData.declaration) {
+            alert("You must accept the declaration to submit the form.");
+            return;
+        }
 
-    // Simple validation
-    if (!policyName || !policyType || !coverageAmount || !duration) {
-      setErrorMessage('All fields are required!');
-      return;
-    }
+        fetch('http://localhost:8080/api/policies', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Policy application submitted:', data);
+            alert("Application submitted successfully!");
+        })
+        .catch(error => {
+            console.error('Error submitting policy application:', error);
+        });
+    };
 
-    // Simulate API call
-    // In a real app, you would send the data to the backend here
-    console.log({ policyName, policyType, coverageAmount, duration });
-    
-    // Show success message
-    setSuccessMessage('Policy created successfully!');
-    
-    // Clear form
-    setPolicyName('');
-    setPolicyType('');
-    setCoverageAmount('');
-    setDuration('');
-  };
+    return (
+        <>
+     
+        <div className={styles.Formbg}>
+            <h1 className={styles.title}>Policy Application Form</h1>
+            <form onSubmit={handleSubmit}>
+                <h4>Personal Information</h4>
+                <label>Name</label><span style={{ color: 'red' }}>*</span>
+                <input 
+                    type="text" 
+                    name="name" 
+                    value={formData.name} 
+                    onChange={handleChange} 
+                    placeholder="Full Name" 
+                /><br />
 
-  return (
-    <div className={styles.formContainer}>
-      <h2>Create New Policy</h2>
-      {errorMessage && <p className={styles.error}>{errorMessage}</p>}
-      {successMessage && <p className={styles.success}>{successMessage}</p>}
-      <form onSubmit={handleSubmit} className={styles.form}>
-        <div className={styles.formGroup}>
-          <label htmlFor="policyName">Policy Name</label>
-          <input
-            type="text"
-            id="policyName"
-            placeholder="Enter policy name"
-            value={policyName}
-            onChange={(e) => setPolicyName(e.target.value)}
-            className={styles.input}
-          />
+                <label>Date of Birth</label><span style={{ color: 'red' }}>*</span>
+                <input 
+                    type="date" 
+                    name="dob" 
+                    value={formData.dob} 
+                    onChange={handleChange} 
+                /><br />
+
+                <label>Gender</label><span style={{ color: 'red' }}>*</span>
+                <input 
+                    type="radio" 
+                    name="gender" 
+                    value="Male" 
+                    checked={formData.gender === 'Male'} 
+                    onChange={handleChange} 
+                /> Male
+                <input 
+                    type="radio" 
+                    name="gender" 
+                    value="Female" 
+                    checked={formData.gender === 'Female'} 
+                    onChange={handleChange} 
+                /> Female
+                <input 
+                    type="radio" 
+                    name="gender" 
+                    value="Others" 
+                    checked={formData.gender === 'Others'} 
+                    onChange={handleChange} 
+                /> Others
+                <br />
+
+                <label>E-mail</label><span style={{ color: 'red' }}>*</span>
+                <input 
+                    type="email" 
+                    name="email" 
+                    value={formData.email} 
+                    onChange={handleChange} 
+                    placeholder="example@example.com" 
+                /><br />
+
+                <label>Phone Number</label><span style={{ color: 'red' }}>*</span>
+                <input 
+                    type="text" 
+                    name="phoneNumber" 
+                    value={formData.phoneNumber} 
+                    onChange={handleChange} 
+                    placeholder="Phone number" 
+                /><br />
+
+                <h4>Employment Information</h4><br />
+                <label>Occupation</label>
+                <input 
+                    type="text" 
+                    name="occupation" 
+                    value={formData.occupation} 
+                    onChange={handleChange} 
+                    placeholder="Occupation" 
+                /><br />
+
+                <label>Employer Name</label>
+                <input 
+                    type="text" 
+                    name="employerName" 
+                    value={formData.employerName} 
+                    onChange={handleChange} 
+                    placeholder="Employer Name" 
+                /><br />
+
+                <label>Work Address</label>
+                <input 
+                    type="text" 
+                    name="workAddress" 
+                    value={formData.workAddress} 
+                    onChange={handleChange} 
+                    placeholder="Work Address" 
+                /><br />
+
+                <h4>Insurance Coverage Details</h4>
+                <label>Type of Insurance Needed</label>
+                <select 
+                    name="insuranceType" 
+                    value={formData.insuranceType} 
+                    onChange={handleChange}
+                >
+                    <option value="Life insurance">Life Insurance</option>
+                    <option value="Auto insurance">Auto Insurance</option>
+                    <option value="Travel insurance">Travel Insurance</option>
+                    <option value="Health insurance">Health Insurance</option>
+                    <option value="Home insurance">Home Insurance</option>
+                    <option value="Business insurance">Business Insurance</option>
+                </select><br />
+
+                <label>Insurance Coverage Amount</label>
+                <input 
+                    type="text" 
+                    name="coverageAmount" 
+                    value={formData.coverageAmount} 
+                    onChange={handleChange} 
+                    placeholder="Coverage Amount" 
+                /><br />
+
+                <label>Premium Payment</label>
+                <input 
+                    type="radio" 
+                    name="premiumPayment" 
+                    value="Monthly" 
+                    checked={formData.premiumPayment === 'Monthly'} 
+                    onChange={handleChange} 
+                /> Monthly
+                <input 
+                    type="radio" 
+                    name="premiumPayment" 
+                    value="Quarterly" 
+                    checked={formData.premiumPayment === 'Quarterly'} 
+                    onChange={handleChange} 
+                /> Quarterly
+                <input 
+                    type="radio" 
+                    name="premiumPayment" 
+                    value="Annually" 
+                    checked={formData.premiumPayment === 'Annually'} 
+                    onChange={handleChange} 
+                /> Annually
+                <br />
+
+                <label>Additional Riders (if any)</label>
+                <input 
+                    type="text" 
+                    name="additionalRiders" 
+                    value={formData.additionalRiders} 
+                    onChange={handleChange} 
+                    placeholder="Additional Riders" 
+                /><br />
+
+                <h4>Declaration</h4>
+                <input 
+                    type="checkbox" 
+                    name="declaration" 
+                    checked={formData.declaration} 
+                    onChange={handleChange} 
+                />
+                <label>
+                    I declare that the information in the application is true and complete to the best of my knowledge. I understand that any misrepresentation or omission may result in the denial of my insurance claim.
+                </label><br />
+
+                <input type="submit" value="Submit" id="submit" />
+            </form>
         </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="policyType">Policy Type</label>
-          <select
-            id="policyType"
-            value={policyType}
-            onChange={(e) => setPolicyType(e.target.value)}
-            className={styles.input}
-          >
-            <option value="">Select Policy Type</option>
-            <option value="health">Health</option>
-            <option value="life">Life</option>
-            <option value="auto">Auto</option>
-          </select>
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="coverageAmount">Coverage Amount</label>
-          <input
-            type="number"
-            id="coverageAmount"
-            placeholder="Enter coverage amount"
-            value={coverageAmount}
-            onChange={(e) => setCoverageAmount(e.target.value)}
-            className={styles.input}
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="duration">Duration (Years)</label>
-          <input
-            type="number"
-            id="duration"
-            placeholder="Enter duration in years"
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            className={styles.input}
-          />
-        </div>
-        <button type="submit" className={styles.button}>Create Policy</button>
-      </form>
-    </div>
-  );
-};
+       
+        </>
+    );
+}
 
 export default AddPolicy;
